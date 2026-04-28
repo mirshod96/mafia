@@ -54,8 +54,8 @@ function AdminConsole({ socket, adminState }) {
                     {phase === 'night' ? (nightVotes[p.id] ? players.find(x => x.id === nightVotes[p.id])?.name : '-') : (dayVotes[p.id] ? players.find(x => x.id === dayVotes[p.id])?.name : '-')}
                   </td>
                   <td style={{ padding: '10px', display: 'flex', gap: '5px' }}>
-                    <button className="btn danger" style={{ padding: '5px 10px', fontSize: '12px' }} onClick={() => socket.emit('adminKillPlayer', p.id)}>УБИТЬ</button>
-                    <button className="btn primary" style={{ padding: '5px 10px', fontSize: '12px', borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }} onClick={() => socket.emit('adminHealPlayer', p.id)}>ВЫЛЕЧИТЬ</button>
+                    <button className="btn danger" style={{ padding: '5px 10px', fontSize: '12px' }} onClick={() => socket.emit('adminKillPlayer', p.id)}>KILL</button>
+                    <button className="btn primary" style={{ padding: '5px 10px', fontSize: '12px', borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }} onClick={() => socket.emit('adminHealPlayer', p.id)}>HEAL</button>
                   </td>
                 </tr>
               ))}
@@ -68,28 +68,28 @@ function AdminConsole({ socket, adminState }) {
 
           {/* Night Actions Queue */}
           <div className="glass-panel" style={{ background: 'rgba(0,0,0,0.5)' }}>
-            <h2 style={{ color: 'var(--accent-warning)', marginBottom: '10px' }}>Очередь ночных действий</h2>
+            <h2 style={{ color: 'var(--accent-warning)', marginBottom: '10px' }}>Night Actions Queue</h2>
             
             {phase === 'night' && (
               <div style={{ marginBottom: '15px' }}>
-                <p style={{ color: 'var(--accent-cyan)' }}>Текущая ночь (ожидание):</p>
+                <p style={{ color: 'var(--accent-cyan)' }}>Current Night (Waiting):</p>
                 <ul>
-                  <li>Мафия хочет убить: {players.find(p => p.id === (Object.values(nightVotes)[0]))?.name || '...'}</li>
-                  <li>Терапевт лечит: {players.find(p => p.id === therapistHealTarget)?.name || '...'}</li>
-                  <li>Диагност проверяет: {players.find(p => p.id === diagnosticianTarget)?.name || '...'}</li>
+                  <li>Mafia wants to kill: {players.find(p => p.id === (Object.values(nightVotes)[0]))?.name || '...'}</li>
+                  <li>Therapist heals: {players.find(p => p.id === therapistHealTarget)?.name || '...'}</li>
+                  <li>Diagnostician checks: {players.find(p => p.id === diagnosticianTarget)?.name || '...'}</li>
                 </ul>
               </div>
             )}
 
             {phase === 'day' && lastNightActions && (
               <div style={{ background: 'rgba(255,204,0,0.1)', border: '1px solid var(--accent-warning)', padding: '15px', borderRadius: '8px' }}>
-                <p style={{ color: 'var(--accent-warning)', fontWeight: 'bold' }}>Итоги прошлой ночи (для ручного решения):</p>
+                <p style={{ color: 'var(--accent-warning)', fontWeight: 'bold' }}>Last Night's Results (Pending Manual Action):</p>
                 <ul>
-                  <li>Кого убивала мафия: <strong style={{ color: 'var(--accent-crimson)' }}>{players.find(p => p.id === lastNightActions.killTarget)?.name || 'Никого'}</strong></li>
-                  <li>Кого лечил терапевт: <strong style={{ color: 'var(--accent-green)' }}>{players.find(p => p.id === lastNightActions.healTarget)?.name || 'Никого'}</strong></li>
-                  <li>Кого проверил диагност: <strong>{players.find(p => p.id === lastNightActions.investigateTarget)?.name || 'Никого'}</strong></li>
+                  <li>Mafia targeted: <strong style={{ color: 'var(--accent-crimson)' }}>{players.find(p => p.id === lastNightActions.killTarget)?.name || 'Nobody'}</strong></li>
+                  <li>Therapist healed: <strong style={{ color: 'var(--accent-green)' }}>{players.find(p => p.id === lastNightActions.healTarget)?.name || 'Nobody'}</strong></li>
+                  <li>Diagnostician checked: <strong>{players.find(p => p.id === lastNightActions.investigateTarget)?.name || 'Nobody'}</strong></li>
                 </ul>
-                <p style={{ marginTop: '10px', fontSize: '12px' }}>* Вы можете вручную применить эффекты с помощью кнопок "УБИТЬ" или "ВЫЛЕЧИТЬ" в таблице слева.</p>
+                <p style={{ marginTop: '10px', fontSize: '12px' }}>* You can manually apply effects using the KILL or HEAL buttons in the table on the left.</p>
               </div>
             )}
           </div>

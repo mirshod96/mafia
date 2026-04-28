@@ -44,11 +44,11 @@ function App() {
     });
 
     socket.on('investigationResult', (result) => {
-      alert(`РЕЗУЛЬТАТ ДИАГНОСТИКИ\n\nИгрок: ${result.targetName}\n${result.result}`);
+      alert(`DIAGNOSIS RESULT\n\nPlayer: ${result.targetName}\n${result.result}`);
     });
 
     socket.on('healResult', (result) => {
-      alert(`ДЕЙСТВИЕ ВЫПОЛНЕНО\n\nВы выбрали лечить: ${result.targetName}\nЕсли на него нападет мафия, он выживет.`);
+      alert(`ACTION EXECUTED\n\nYou chose to heal: ${result.targetName}\nIf the Mafia attacks them, they will survive.`);
     });
 
     return () => {

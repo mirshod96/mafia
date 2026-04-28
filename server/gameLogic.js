@@ -106,7 +106,7 @@ class GameEngine {
     this.eliminatedTonight = null;
     this.lastNightActions = { killTarget: null, healTarget: null, investigateTarget: null };
     
-    this.addSystemMessage(`Ночь ${this.dayCount} наступила. Ждем действий ночных ролей.`);
+    this.addSystemMessage(`Night ${this.dayCount} has fallen. Waiting for night roles to act.`);
     this.broadcastState();
   }
 
@@ -136,7 +136,7 @@ class GameEngine {
       investigateTarget: this.diagnosticianTarget
     };
 
-    this.addSystemMessage(`Наступил день. Ведущий (Админ) принимает решение по итогам ночи.`);
+    this.addSystemMessage(`Day has broken. The Game Master is making the final decision on the night's events.`);
 
     // Check Win Condition
     if (this.checkWinCondition()) return;
@@ -190,12 +190,12 @@ class GameEngine {
       let resultText = '';
       
       if (target.role === 'Mole') {
-        resultText = 'Пациент абсолютно здоров (Симулянт)';
+        resultText = 'The patient is completely healthy (Faker)';
       } else if (target.role === 'Therapist') {
-        resultText = 'Это Терапевт';
+        resultText = 'This is the Therapist';
       } else {
-        const symptoms = target.caseData?.symptoms?.join(', ') || 'Нет данных';
-        resultText = `Симптомы пациента: ${symptoms}`;
+        const symptoms = target.caseData?.symptoms?.join(', ') || 'No data';
+        resultText = `Patient symptoms: ${symptoms}`;
       }
 
       this.io.to(socketId).emit('investigationResult', {
@@ -216,7 +216,7 @@ class GameEngine {
   adminKillPlayer(targetId) {
     if (this.players[targetId]) {
       this.players[targetId].isAlive = false;
-      this.addSystemMessage(`Админ: Игрок ${this.players[targetId].name} был УБИТ.`);
+      this.addSystemMessage(`Admin: Player ${this.players[targetId].name} has been KILLED.`);
       if (this.checkWinCondition()) return;
       this.broadcastState();
     }
@@ -225,7 +225,7 @@ class GameEngine {
   adminHealPlayer(targetId) {
     if (this.players[targetId]) {
       this.players[targetId].isAlive = true;
-      this.addSystemMessage(`Админ: Игрок ${this.players[targetId].name} был ВЫЛЕЧЕН (Спасен).`);
+      this.addSystemMessage(`Admin: Player ${this.players[targetId].name} has been HEALED (Saved).`);
       if (this.checkWinCondition()) return;
       this.broadcastState();
     }
