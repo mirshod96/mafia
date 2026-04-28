@@ -1,0 +1,142 @@
+[
+  {
+    "id": 1,
+    "diagnosis": "Myocardial Infarction",
+    "symptoms": ["Chest pain radiating to left arm", "Diaphoresis (sweating)", "Shortness of breath", "Nausea"],
+    "vitals": { "hr": 110, "bp": "150/90", "temp": 37.1, "rr": 22 },
+    "labResults": "Elevated Troponin I, ST-segment elevation on ECG"
+  },
+  {
+    "id": 2,
+    "diagnosis": "Acute Asthma Exacerbation",
+    "symptoms": ["Wheezing", "Chest tightness", "Coughing", "Tachypnea"],
+    "vitals": { "hr": 105, "bp": "130/80", "temp": 36.8, "rr": 28 },
+    "labResults": "Decreased FEV1, Hypoxia on ABG"
+  },
+  {
+    "id": 3,
+    "diagnosis": "Sepsis",
+    "symptoms": ["Fever", "Chills", "Confusion", "Extreme weakness"],
+    "vitals": { "hr": 125, "bp": "85/50", "temp": 39.4, "rr": 26 },
+    "labResults": "Elevated WBC count, High Lactate, Positive blood cultures"
+  },
+  {
+    "id": 4,
+    "diagnosis": "Ischemic Stroke",
+    "symptoms": ["Unilateral facial drooping", "Right arm weakness", "Slurred speech", "Loss of balance"],
+    "vitals": { "hr": 88, "bp": "180/100", "temp": 37.0, "rr": 16 },
+    "labResults": "CT head shows no hemorrhage, MRI shows acute infarct"
+  },
+  {
+    "id": 5,
+    "diagnosis": "Pulmonary Embolism",
+    "symptoms": ["Sudden shortness of breath", "Pleuritic chest pain", "Cough with blood-tinged sputum"],
+    "vitals": { "hr": 120, "bp": "110/70", "temp": 37.3, "rr": 30 },
+    "labResults": "Elevated D-dimer, S1Q3T3 on ECG, Filling defect on CT angiogram"
+  },
+  {
+    "id": 6,
+    "diagnosis": "Diabetic Ketoacidosis",
+    "symptoms": ["Excessive thirst", "Frequent urination", "Fruity breath odor", "Abdominal pain", "Nausea"],
+    "vitals": { "hr": 115, "bp": "100/60", "temp": 36.5, "rr": 24 },
+    "labResults": "Blood glucose 450 mg/dL, Positive serum ketones, pH 7.2"
+  },
+  {
+    "id": 7,
+    "diagnosis": "Acute Appendicitis",
+    "symptoms": ["Periumbilical pain migrating to right lower quadrant", "Loss of appetite", "Nausea", "Low-grade fever"],
+    "vitals": { "hr": 95, "bp": "120/80", "temp": 37.9, "rr": 18 },
+    "labResults": "Elevated WBC count with left shift, Ultrasound shows enlarged appendix"
+  },
+  {
+    "id": 8,
+    "diagnosis": "Bacterial Meningitis",
+    "symptoms": ["Severe headache", "Stiff neck", "Photophobia", "High fever", "Altered mental status"],
+    "vitals": { "hr": 110, "bp": "115/75", "temp": 39.8, "rr": 20 },
+    "labResults": "CSF shows low glucose, high protein, and high neutrophil count"
+  },
+  {
+    "id": 9,
+    "diagnosis": "Acute Pancreatitis",
+    "symptoms": ["Severe epigastric pain radiating to back", "Nausea", "Vomiting", "Swollen abdomen"],
+    "vitals": { "hr": 105, "bp": "135/85", "temp": 37.5, "rr": 22 },
+    "labResults": "Elevated serum amylase and lipase (3x upper limit of normal)"
+  },
+  {
+    "id": 10,
+    "diagnosis": "Pneumothorax",
+    "symptoms": ["Sudden sharp chest pain on one side", "Shortness of breath", "Rapid heart rate"],
+    "vitals": { "hr": 118, "bp": "110/65", "temp": 36.9, "rr": 26 },
+    "labResults": "Chest X-ray shows absence of lung markings on affected side"
+  },
+  {
+    "id": 11,
+    "diagnosis": "Gastrointestinal Bleed",
+    "symptoms": ["Vomiting blood (hematemesis)", "Dark, tarry stools (melena)", "Dizziness", "Fatigue"],
+    "vitals": { "hr": 120, "bp": "90/60", "temp": 36.7, "rr": 20 },
+    "labResults": "Low hemoglobin and hematocrit, Positive FOBT"
+  },
+  {
+    "id": 12,
+    "diagnosis": "Anaphylaxis",
+    "symptoms": ["Hives", "Swelling of lips and tongue", "Wheezing", "Difficulty swallowing"],
+    "vitals": { "hr": 130, "bp": "80/40", "temp": 37.0, "rr": 32 },
+    "labResults": "Elevated serum tryptase"
+  },
+  {
+    "id": 13,
+    "diagnosis": "Hypoglycemia",
+    "symptoms": ["Tremors", "Sweating", "Palpitations", "Confusion", "Irritability"],
+    "vitals": { "hr": 105, "bp": "125/80", "temp": 36.5, "rr": 18 },
+    "labResults": "Blood glucose 35 mg/dL"
+  },
+  {
+    "id": 14,
+    "diagnosis": "Acute Cholecystitis",
+    "symptoms": ["Right upper quadrant pain", "Pain after eating fatty meals", "Nausea", "Fever"],
+    "vitals": { "hr": 92, "bp": "130/85", "temp": 38.2, "rr": 18 },
+    "labResults": "Elevated WBC count, Ultrasound shows gallstones and thickened gallbladder wall"
+  },
+  {
+    "id": 15,
+    "diagnosis": "Pyelonephritis",
+    "symptoms": ["Flank pain", "Fever", "Chills", "Painful urination", "Nausea"],
+    "vitals": { "hr": 100, "bp": "115/75", "temp": 38.8, "rr": 20 },
+    "labResults": "Urinalysis shows pyuria and bacteriuria, Urine culture positive"
+  },
+  {
+    "id": 16,
+    "diagnosis": "Ectopic Pregnancy",
+    "symptoms": ["Sharp lower abdominal pain", "Vaginal bleeding", "Dizziness", "Shoulder pain"],
+    "vitals": { "hr": 115, "bp": "95/60", "temp": 37.0, "rr": 22 },
+    "labResults": "Positive beta-hCG, Transvaginal ultrasound shows empty uterus and adnexal mass"
+  },
+  {
+    "id": 17,
+    "diagnosis": "Carbon Monoxide Poisoning",
+    "symptoms": ["Headache", "Dizziness", "Weakness", "Nausea", "Confusion", "Cherry-red skin (rare)"],
+    "vitals": { "hr": 110, "bp": "120/80", "temp": 36.8, "rr": 24 },
+    "labResults": "Elevated carboxyhemoglobin level"
+  },
+  {
+    "id": 18,
+    "diagnosis": "Acute Renal Failure",
+    "symptoms": ["Decreased urine output", "Fluid retention (edema)", "Fatigue", "Confusion"],
+    "vitals": { "hr": 90, "bp": "160/95", "temp": 37.1, "rr": 20 },
+    "labResults": "Elevated BUN and Creatinine, Hyperkalemia"
+  },
+  {
+    "id": 19,
+    "diagnosis": "Opiate Overdose",
+    "symptoms": ["Pinpoint pupils", "Unresponsiveness", "Shallow or slow breathing", "Blue lips/nails"],
+    "vitals": { "hr": 50, "bp": "100/60", "temp": 36.2, "rr": 6 },
+    "labResults": "Positive urine toxicology for opiates"
+  },
+  {
+    "id": 20,
+    "diagnosis": "Thyroid Storm",
+    "symptoms": ["High fever", "Tachycardia", "Agitation", "Sweating", "Tremors"],
+    "vitals": { "hr": 140, "bp": "150/90", "temp": 40.0, "rr": 26 },
+    "labResults": "Undetectable TSH, Markedly elevated Free T4 and T3"
+  }
+]
