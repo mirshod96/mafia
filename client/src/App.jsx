@@ -44,18 +44,18 @@ function App() {
     });
 
     socket.on('investigationResult', (result) => {
-      alert(`INVESTIGATION RESULT\nTarget: ${result.targetName}\nTrue Role: ${result.role}`);
+      alert(`РЕЗУЛЬТАТ ДИАГНОСТИКИ\n\nИгрок: ${result.targetName}\n${result.result}`);
     });
 
-    socket.on('therapistDataResult', (result) => {
-      alert(`MEDICAL CHART RECEIVED\nTarget: ${result.targetName}\nDiagnosis: ${result.caseData.diagnosis}\nVitals: HR ${result.caseData.vitals.hr}, BP ${result.caseData.vitals.bp}\nLabs: ${result.caseData.labResults}`);
+    socket.on('healResult', (result) => {
+      alert(`ДЕЙСТВИЕ ВЫПОЛНЕНО\n\nВы выбрали лечить: ${result.targetName}\nЕсли на него нападет мафия, он выживет.`);
     });
 
     return () => {
       socket.off('gameState');
       socket.off('adminState');
       socket.off('investigationResult');
-      socket.off('therapistDataResult');
+      socket.off('healResult');
     };
   }, [view]);
 

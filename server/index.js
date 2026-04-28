@@ -51,12 +51,8 @@ io.on('connection', (socket) => {
     game.diagnosticianInvestigate(socket.id, targetId);
   });
 
-  socket.on('therapistRequest', (targetId) => {
-    game.therapistRequestAdmin(socket.id, targetId);
-  });
-
-  socket.on('adminResolveTherapist', (approved) => {
-    game.adminResolveTherapistRequest(approved);
+  socket.on('therapistHeal', (targetId) => {
+    game.therapistHeal(socket.id, targetId);
   });
   
   socket.on('triggerNextPhase', () => {
@@ -66,6 +62,14 @@ io.on('connection', (socket) => {
     } else if (game.phase === 'day') {
       game.startNight();
     }
+  });
+
+  socket.on('adminKillPlayer', (targetId) => {
+    game.adminKillPlayer(targetId);
+  });
+
+  socket.on('adminHealPlayer', (targetId) => {
+    game.adminHealPlayer(targetId);
   });
 
   socket.on('sendMessage', ({ text, channel }) => {

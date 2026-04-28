@@ -14,7 +14,8 @@ class GameEngine {
     this.nightVotes = {}; // moleSocketId -> targetPlayerId
     this.dayVotes = {}; // socketId -> targetPlayerId
     this.diagnosticianTarget = null;
-    this.therapistRequest = null; // { therapistId, targetId, status: 'pending'|'approved'|'rejected' }
+    this.therapistHealTarget = null; // targetId saved by therapist
+    this.lastNightActions = { killTarget: null, healTarget: null, investigateTarget: null };
     this.eliminatedTonight = null;
     this.winner = null;
     this.chatHistory = [];
@@ -52,8 +53,8 @@ class GameEngine {
     const playerIds = Object.keys(this.players);
     const numPlayers = playerIds.length;
     
-    // Scale roles based on players for easier testing, but aim for 18
-    let numMoles = Math.max(1, Math.floor(numPlayers / 6));
+    // Scale roles based on players
+    let numMoles = Math.max(1, Math.floor(numPlayers / 5));
     let hasDiagnostician = numPlayers >= 5 ? 1 : 0;
     let hasTherapist = numPlayers >= 6 ? 1 : 0;
     
@@ -101,10 +102,11 @@ class GameEngine {
     this.dayCount++;
     this.nightVotes = {};
     this.diagnosticianTarget = null;
-    this.therapistRequest = null;
+    this.therapistHealTarget = null;
     this.eliminatedTonight = null;
+    this.lastNightActions = { killTarget: null, healTarget: null, investigateTarget: null };
     
-    this.addSystemMessage(`Night ${this.dayCount} has fallen. The Moles are choosing a target.`);
+    this.addSystemMessage(`Ночь ${this.dayCount} наступила. Ждем действий ночных ролей.`);
     this.broadcastState();
   }
 
@@ -128,13 +130,13 @@ class GameEngine {
       }
     }
 
-    if (targetToEliminate && this.players[targetToEliminate]) {
-      this.players[targetToEliminate].isAlive = false;
-      this.eliminatedTonight = targetToEliminate;
-      this.addSystemMessage(`Morning report: ${this.players[targetToEliminate].name} was eliminated during the night.`);
-    } else {
-      this.addSystemMessage(`Morning report: The night was peaceful. No one was eliminated.`);
-    }
+    this.lastNightActions = {
+      killTarget: targetToEliminate,
+      healTarget: this.therapistHealTarget,
+      investigateTarget: this.diagnosticianTarget
+    };
+
+    this.addSystemMessage(`Наступил день. Ведущий (Админ) принимает решение по итогам ночи.`);
 
     // Check Win Condition
     if (this.checkWinCondition()) return;
@@ -184,41 +186,47 @@ class GameEngine {
   diagnosticianInvestigate(socketId, targetId) {
     if (this.phase === 'night' && this.players[socketId].role === 'Diagnostician') {
       const target = this.players[targetId];
-      // Send private result
+      this.diagnosticianTarget = targetId;
+      let resultText = '';
+      
+      if (target.role === 'Mole') {
+        resultText = 'Пациент абсолютно здоров (Симулянт)';
+      } else if (target.role === 'Therapist') {
+        resultText = 'Это Терапевт';
+      } else {
+        const symptoms = target.caseData?.symptoms?.join(', ') || 'Нет данных';
+        resultText = `Симптомы пациента: ${symptoms}`;
+      }
+
       this.io.to(socketId).emit('investigationResult', {
         targetName: target.name,
-        role: target.role === 'Mole' ? 'Mole' : 'Patient'
+        result: resultText
       });
     }
   }
 
-  therapistRequestAdmin(socketId, targetId) {
-    if (this.phase === 'day' && this.players[socketId].role === 'Therapist') {
-      this.therapistRequest = {
-        therapistId: socketId,
-        targetId,
-        status: 'pending'
-      };
-      this.addSystemMessage(`The Therapist has requested the medical chart of ${this.players[targetId].name}.`);
+  therapistHeal(socketId, targetId) {
+    if (this.phase === 'night' && this.players[socketId].role === 'Therapist') {
+      this.therapistHealTarget = targetId;
+      // Send confirmation to therapist
+      this.io.to(socketId).emit('healResult', { targetName: this.players[targetId].name });
+    }
+  }
+
+  adminKillPlayer(targetId) {
+    if (this.players[targetId]) {
+      this.players[targetId].isAlive = false;
+      this.addSystemMessage(`Админ: Игрок ${this.players[targetId].name} был УБИТ.`);
+      if (this.checkWinCondition()) return;
       this.broadcastState();
     }
   }
 
-  adminResolveTherapistRequest(approved) {
-    if (this.therapistRequest && this.therapistRequest.status === 'pending') {
-      this.therapistRequest.status = approved ? 'approved' : 'rejected';
-      
-      if (approved) {
-        const target = this.players[this.therapistRequest.targetId];
-        // In real game, emit full data to Therapist, but for now we just show what their real data is
-        this.io.to(this.therapistRequest.therapistId).emit('therapistDataResult', {
-          targetName: target.name,
-          caseData: target.caseData
-        });
-        this.addSystemMessage(`Admin approved the Therapist's request.`);
-      } else {
-        this.addSystemMessage(`Admin rejected the Therapist's request.`);
-      }
+  adminHealPlayer(targetId) {
+    if (this.players[targetId]) {
+      this.players[targetId].isAlive = true;
+      this.addSystemMessage(`Админ: Игрок ${this.players[targetId].name} был ВЫЛЕЧЕН (Спасен).`);
+      if (this.checkWinCondition()) return;
       this.broadcastState();
     }
   }
@@ -318,7 +326,6 @@ class GameEngine {
       players: safePlayers,
       me: currentPlayer,
       chat: safeChat,
-      therapistRequest: this.therapistRequest,
       winner: this.winner
     };
   }
@@ -330,10 +337,12 @@ class GameEngine {
       dayCount: this.dayCount,
       players: Object.values(this.players),
       chat: this.chatHistory,
-      therapistRequest: this.therapistRequest,
       winner: this.winner,
       nightVotes: this.nightVotes,
-      dayVotes: this.dayVotes
+      dayVotes: this.dayVotes,
+      therapistHealTarget: this.therapistHealTarget,
+      diagnosticianTarget: this.diagnosticianTarget,
+      lastNightActions: this.lastNightActions
     };
   }
 

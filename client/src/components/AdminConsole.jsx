@@ -3,7 +3,7 @@ import React from 'react';
 function AdminConsole({ socket, adminState }) {
   if (!adminState) return <div style={{ color: 'white', padding: '20px' }}>Loading Admin Console...</div>;
 
-  const { phase, dayCount, players, therapistRequest, winner, nightVotes, dayVotes } = adminState;
+  const { phase, dayCount, players, winner, nightVotes, dayVotes, therapistHealTarget, diagnosticianTarget, lastNightActions } = adminState;
 
   const handleNextPhase = () => {
     socket.emit('triggerNextPhase');
@@ -11,10 +11,6 @@ function AdminConsole({ socket, adminState }) {
 
   const handleExecuteDayVote = () => {
     socket.emit('executeDayVote');
-  };
-
-  const handleTherapistApprove = (approved) => {
-    socket.emit('adminResolveTherapist', approved);
   };
 
   return (
@@ -42,6 +38,7 @@ function AdminConsole({ socket, adminState }) {
                 <th style={{ padding: '10px' }}>Status</th>
                 <th style={{ padding: '10px' }}>Assigned Case (True/Fake)</th>
                 <th style={{ padding: '10px' }}>Current Vote</th>
+                <th style={{ padding: '10px' }}>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -56,6 +53,10 @@ function AdminConsole({ socket, adminState }) {
                   <td style={{ padding: '10px' }}>
                     {phase === 'night' ? (nightVotes[p.id] ? players.find(x => x.id === nightVotes[p.id])?.name : '-') : (dayVotes[p.id] ? players.find(x => x.id === dayVotes[p.id])?.name : '-')}
                   </td>
+                  <td style={{ padding: '10px', display: 'flex', gap: '5px' }}>
+                    <button className="btn danger" style={{ padding: '5px 10px', fontSize: '12px' }} onClick={() => socket.emit('adminKillPlayer', p.id)}>УБИТЬ</button>
+                    <button className="btn primary" style={{ padding: '5px 10px', fontSize: '12px', borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }} onClick={() => socket.emit('adminHealPlayer', p.id)}>ВЫЛЕЧИТЬ</button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -64,20 +65,32 @@ function AdminConsole({ socket, adminState }) {
 
         {/* Right Column - Events & Approvals */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          
-          {/* Approval Console */}
+
+          {/* Night Actions Queue */}
           <div className="glass-panel" style={{ background: 'rgba(0,0,0,0.5)' }}>
-            <h2 style={{ color: 'var(--accent-warning)', marginBottom: '10px' }}>Approval Console</h2>
-            {therapistRequest?.status === 'pending' ? (
-              <div style={{ background: 'rgba(255,204,0,0.1)', border: '1px solid var(--accent-warning)', padding: '15px', borderRadius: '8px' }}>
-                <p><strong>Therapist Request:</strong> Access to {players.find(p => p.id === therapistRequest.targetId)?.name}'s chart.</p>
-                <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                  <button className="btn primary" onClick={() => handleTherapistApprove(true)}>Approve (Release Data)</button>
-                  <button className="btn danger" onClick={() => handleTherapistApprove(false)}>Deny (Block Access)</button>
-                </div>
+            <h2 style={{ color: 'var(--accent-warning)', marginBottom: '10px' }}>Очередь ночных действий</h2>
+            
+            {phase === 'night' && (
+              <div style={{ marginBottom: '15px' }}>
+                <p style={{ color: 'var(--accent-cyan)' }}>Текущая ночь (ожидание):</p>
+                <ul>
+                  <li>Мафия хочет убить: {players.find(p => p.id === (Object.values(nightVotes)[0]))?.name || '...'}</li>
+                  <li>Терапевт лечит: {players.find(p => p.id === therapistHealTarget)?.name || '...'}</li>
+                  <li>Диагност проверяет: {players.find(p => p.id === diagnosticianTarget)?.name || '...'}</li>
+                </ul>
               </div>
-            ) : (
-              <p style={{ color: 'var(--text-muted)' }}>No pending requests.</p>
+            )}
+
+            {phase === 'day' && lastNightActions && (
+              <div style={{ background: 'rgba(255,204,0,0.1)', border: '1px solid var(--accent-warning)', padding: '15px', borderRadius: '8px' }}>
+                <p style={{ color: 'var(--accent-warning)', fontWeight: 'bold' }}>Итоги прошлой ночи (для ручного решения):</p>
+                <ul>
+                  <li>Кого убивала мафия: <strong style={{ color: 'var(--accent-crimson)' }}>{players.find(p => p.id === lastNightActions.killTarget)?.name || 'Никого'}</strong></li>
+                  <li>Кого лечил терапевт: <strong style={{ color: 'var(--accent-green)' }}>{players.find(p => p.id === lastNightActions.healTarget)?.name || 'Никого'}</strong></li>
+                  <li>Кого проверил диагност: <strong>{players.find(p => p.id === lastNightActions.investigateTarget)?.name || 'Никого'}</strong></li>
+                </ul>
+                <p style={{ marginTop: '10px', fontSize: '12px' }}>* Вы можете вручную применить эффекты с помощью кнопок "УБИТЬ" или "ВЫЛЕЧИТЬ" в таблице слева.</p>
+              </div>
             )}
           </div>
 

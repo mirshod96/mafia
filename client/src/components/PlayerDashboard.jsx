@@ -49,14 +49,19 @@ function PlayerDashboard({ socket, gameState }) {
         socket.emit('voteNight', selectedTarget);
       } else if (me.role === 'Diagnostician') {
         socket.emit('diagnosticianInvestigate', selectedTarget);
+      } else if (me.role === 'Therapist') {
+        socket.emit('therapistHeal', selectedTarget);
       }
     } else if (phase === 'day') {
-      if (me.role === 'Therapist') {
-        socket.emit('therapistRequest', selectedTarget);
-      } else {
-        socket.emit('voteDay', selectedTarget);
-      }
+      socket.emit('voteDay', selectedTarget);
     }
+  };
+
+  const roleNameMap = {
+    'Mole': 'Пациент-Мафия',
+    'Diagnostician': 'Диагност',
+    'Therapist': 'Терапевт',
+    'Patient': 'Пациент'
   };
 
   const getRoleIcon = () => {
@@ -76,7 +81,7 @@ function PlayerDashboard({ socket, gameState }) {
           {getRoleIcon()}
           <div>
             <div className="mono" style={{ fontSize: '20px', fontWeight: 'bold' }}>{me.name}</div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '14px', textTransform: 'uppercase' }}>{me.role}</div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '14px', textTransform: 'uppercase' }}>{roleNameMap[me.role]}</div>
           </div>
         </div>
         
@@ -102,10 +107,20 @@ function PlayerDashboard({ socket, gameState }) {
           
           {me.caseData && (
             <div>
-              <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '10px' }}>DIAGNOSIS: {me.caseData.diagnosis}</h3>
+              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '8px', marginBottom: '20px', borderLeft: '4px solid var(--accent-cyan)' }}>
+                <h3 style={{ marginBottom: '5px', color: 'var(--accent-cyan)' }}>ПРАВИЛА РОЛИ: {roleNameMap[me.role]}</h3>
+                <p style={{ fontSize: '14px', color: 'var(--text-main)' }}>
+                  {me.role === 'Patient' && 'Ваша задача - описывать свои симптомы честно, чтобы доказать врачам, что вы реально больны, и вычислить мафию.'}
+                  {me.role === 'Mole' && 'Вы абсолютно здоровы, но должны симулировать эти симптомы. Ваша цель - убить всех врачей и пациентов. Ночью вы выбираете жертву.'}
+                  {me.role === 'Therapist' && 'Ночью вы можете выбрать одного игрока, чтобы вылечить (спасти) его от убийства мафией.'}
+                  {me.role === 'Diagnostician' && 'Ночью вы делаете запрос системе, чтобы получить симптомы любого участника и проверить, врет ли он.'}
+                </p>
+              </div>
+
+              <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '10px' }}>ДИАГНОЗ: {me.caseData.diagnosis}</h3>
               {me.role === 'Mole' && (
                 <div style={{ background: 'rgba(255,51,102,0.1)', padding: '10px', borderRadius: '8px', border: '1px solid var(--accent-crimson)', marginBottom: '15px' }}>
-                  <p style={{ color: 'var(--accent-crimson)', fontSize: '12px' }}>FAKE PROFILE ASSIGNED. MEMORIZE THESE SYMPTOMS.</p>
+                  <p style={{ color: 'var(--accent-crimson)', fontSize: '12px' }}>ФАЛЬШИВЫЙ ПРОФИЛЬ. ЗАПОМНИТЕ ЭТИ СИМПТОМЫ ДЛЯ СИМУЛЯЦИИ.</p>
                 </div>
               )}
               
@@ -174,31 +189,31 @@ function PlayerDashboard({ socket, gameState }) {
           <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--glass-border)' }}>
             {phase === 'night' && me.role === 'Mole' && (
               <button className="btn danger" style={{ width: '100%' }} onClick={handleAction} disabled={!selectedTarget}>
-                SABOTAGE TARGET (VOTE)
+                УБИТЬ ЦЕЛЬ
               </button>
             )}
             
             {phase === 'night' && me.role === 'Diagnostician' && (
               <button className="btn primary" style={{ width: '100%' }} onClick={handleAction} disabled={!selectedTarget}>
-                INVESTIGATE RECORD
+                ЗАПРОСИТЬ СИМПТОМЫ
               </button>
             )}
 
-            {phase === 'night' && (me.role === 'Patient' || me.role === 'Therapist') && (
+            {phase === 'night' && me.role === 'Therapist' && (
+              <button className="btn primary" style={{ width: '100%', borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }} onClick={handleAction} disabled={!selectedTarget}>
+                ВЫЛЕЧИТЬ (СПАСТИ)
+              </button>
+            )}
+
+            {phase === 'night' && me.role === 'Patient' && (
               <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
-                Waiting for night actions to resolve...
+                Ожидание действий ночи...
               </div>
-            )}
-
-            {phase === 'day' && me.role === 'Therapist' && (
-              <button className="btn" style={{ width: '100%', borderColor: 'var(--accent-green)', color: 'var(--accent-green)', marginBottom: '10px' }} onClick={handleAction} disabled={!selectedTarget}>
-                REQUEST CHART FROM ADMIN
-              </button>
             )}
 
             {phase === 'day' && (
               <button className="btn primary" style={{ width: '100%' }} onClick={() => socket.emit('voteDay', selectedTarget)} disabled={!selectedTarget}>
-                VOTE TO DISCHARGE
+                ГОЛОСОВАТЬ НА ВЫПИСКУ (ИСКЛЮЧИТЬ)
               </button>
             )}
           </div>
