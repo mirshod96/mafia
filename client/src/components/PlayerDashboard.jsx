@@ -4,7 +4,6 @@ import { Activity, ShieldAlert, HeartPulse, UserSearch, FileText } from 'lucide-
 
 function PlayerDashboard({ socket, gameState }) {
   const { me, phase, dayCount, players, winner } = gameState;
-  const [selectedTarget, setSelectedTarget] = useState('');
 
   if (phase === 'end') {
     return (
@@ -40,22 +39,6 @@ function PlayerDashboard({ socket, gameState }) {
       </div>
     );
   }
-
-  const handleAction = () => {
-    if (!selectedTarget) return;
-    
-    if (phase === 'night') {
-      if (me.role === 'Mole') {
-        socket.emit('voteNight', selectedTarget);
-      } else if (me.role === 'Diagnostician') {
-        socket.emit('diagnosticianInvestigate', selectedTarget);
-      } else if (me.role === 'Therapist') {
-        socket.emit('therapistHeal', selectedTarget);
-      }
-    } else if (phase === 'day') {
-      socket.emit('voteDay', selectedTarget);
-    }
-  };
 
   const roleNameMap = {
     'Mole': 'Mafia',
@@ -118,72 +101,6 @@ function PlayerDashboard({ socket, gameState }) {
               </div>
             </div>
           )}
-        </div>
-
-        {/* CENTER PANEL - CHAT */}
-        <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
-          <ChatSystem socket={socket} gameState={gameState} defaultChannel="public" />
-        </div>
-
-        {/* RIGHT PANEL - ACTIONS & PLAYERS */}
-        <div className="glass-panel scrollable-section" style={{ display: 'flex', flexDirection: 'column' }}>
-          <h2 className="mono" style={{ marginBottom: '20px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '10px' }}>ACTION TERMINAL</h2>
-          
-          <div style={{ flex: 1 }}>
-            <h4 style={{ color: 'var(--text-muted)', marginBottom: '10px' }}>SELECT TARGET:</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {players.filter(p => p.isAlive && p.id !== me.id).map(p => (
-                <div 
-                  key={p.id}
-                  onClick={() => setSelectedTarget(p.id)}
-                  style={{ 
-                    padding: '12px', 
-                    borderRadius: '8px', 
-                    border: selectedTarget === p.id ? '1px solid var(--accent-cyan)' : '1px solid var(--glass-border)',
-                    background: selectedTarget === p.id ? 'rgba(0,255,204,0.1)' : 'rgba(0,0,0,0.3)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    justifyContent: 'space-between'
-                  }}
-                >
-                  <span>{p.name}</span>
-                  {p.role !== 'Unknown' && <span style={{ color: 'var(--accent-crimson)' }}>({p.role})</span>}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--glass-border)' }}>
-            {phase === 'night' && me.role === 'Mole' && (
-              <button className="btn danger" style={{ width: '100%' }} onClick={handleAction} disabled={!selectedTarget}>
-                KILL TARGET
-              </button>
-            )}
-            
-            {phase === 'night' && me.role === 'Diagnostician' && (
-              <button className="btn primary" style={{ width: '100%' }} onClick={handleAction} disabled={!selectedTarget}>
-                INVESTIGATE TARGET
-              </button>
-            )}
-
-            {phase === 'night' && me.role === 'Therapist' && (
-              <button className="btn primary" style={{ width: '100%', borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }} onClick={handleAction} disabled={!selectedTarget}>
-                HEAL (SAVE) TARGET
-              </button>
-            )}
-
-            {phase === 'night' && me.role === 'Patient' && (
-              <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
-                Waiting for night actions...
-              </div>
-            )}
-
-            {phase === 'day' && (
-              <button className="btn primary" style={{ width: '100%' }} onClick={() => socket.emit('voteDay', selectedTarget)} disabled={!selectedTarget}>
-                VOTE TO ELIMINATE
-              </button>
-            )}
-          </div>
         </div>
       </div>
     </div>

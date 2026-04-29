@@ -191,11 +191,17 @@ input:focus {
 }
 
 .dashboard-grid {
-  display: grid;
-  grid-template-columns: 350px 1fr 350px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
   gap: 24px;
   padding: 24px;
   height: calc(100vh - 70px);
+}
+
+.dashboard-grid > .glass-panel {
+  max-width: 600px;
+  width: 100%;
 }
 
 .scrollable-section {
