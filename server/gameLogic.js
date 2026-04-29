@@ -69,15 +69,10 @@ class GameEngine {
     const playerIds = Object.keys(this.players);
     const numPlayers = playerIds.length;
     
-    // Scale roles based on players
-    let numMoles = Math.max(1, Math.floor(numPlayers / 5));
+    // Scale roles based on players (1 Mafia per 4 players)
+    let numMoles = Math.max(1, Math.floor(numPlayers / 4));
     let hasDiagnostician = numPlayers >= 5 ? 1 : 0;
     let hasTherapist = numPlayers >= 6 ? 1 : 0;
-    
-    // If exactly 18 players, it matches the spec: 3 Moles, 1 Diag, 1 Ther, 13 Pat
-    if (numPlayers === 18) {
-      numMoles = 3; hasDiagnostician = 1; hasTherapist = 1;
-    }
 
     const numPatients = numPlayers - numMoles - hasDiagnostician - hasTherapist;
 
