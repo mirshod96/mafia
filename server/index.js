@@ -20,8 +20,9 @@ const game = new GameEngine(io);
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
-  socket.on('joinGame', (name) => {
-    game.addPlayer(socket.id, name);
+  socket.on('joinGame', ({ name, playerId }) => {
+    const result = game.addPlayer(socket.id, name, playerId);
+    socket.emit('joinResult', result);
   });
   
   socket.on('joinAdmin', () => {

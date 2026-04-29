@@ -13,8 +13,20 @@ function App() {
   const [adminState, setAdminState] = useState(null);
   const [view, setView] = useState('login'); // login, lobby, dashboard, admin
   const [playerName, setPlayerName] = useState('');
+  const [joinError, setJoinError] = useState('');
   const prevPhaseRef = useRef(null);
   const prevAliveRef = useRef(null);
+
+  // Generate or retrieve persistent player ID
+  const playerIdRef = useRef(null);
+  useEffect(() => {
+    let savedId = localStorage.getItem('heuc_playerId');
+    if (!savedId) {
+      savedId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('heuc_playerId', savedId);
+    }
+    playerIdRef.current = savedId;
+  }, []);
 
   useEffect(() => {
     socket.on('gameState', (state) => {
@@ -51,19 +63,29 @@ function App() {
       alert(`ACTION EXECUTED\n\nYou chose to heal: ${result.targetName}\nIf the Mafia attacks them, they will survive.`);
     });
 
+    socket.on('joinResult', (result) => {
+      if (result.success) {
+        setJoinError('');
+        setView('lobby');
+      } else {
+        setJoinError(result.reason);
+      }
+    });
+
     return () => {
       socket.off('gameState');
       socket.off('adminState');
       socket.off('investigationResult');
       socket.off('healResult');
+      socket.off('joinResult');
     };
   }, [view]);
 
   const joinGame = (e) => {
     e.preventDefault();
-    if (playerName.trim()) {
-      socket.emit('joinGame', playerName);
-      setView('lobby');
+    if (playerName.trim() && playerIdRef.current) {
+      setJoinError('');
+      socket.emit('joinGame', { name: playerName, playerId: playerIdRef.current });
     }
   };
 
@@ -94,6 +116,11 @@ function App() {
                 required
               />
             </div>
+            {joinError && (
+              <div style={{ color: 'var(--accent-crimson)', fontSize: '14px', background: 'rgba(255,51,102,0.1)', padding: '10px', borderRadius: '4px', border: '1px solid var(--accent-crimson)' }}>
+                {joinError}
+              </div>
+            )}
             <button type="submit" className="btn primary">Join Ward</button>
             <button type="button" onClick={joinAdmin} className="btn" style={{ marginTop: '10px' }}>Access Master Console</button>
           </form>

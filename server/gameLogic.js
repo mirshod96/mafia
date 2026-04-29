@@ -8,11 +8,12 @@ class GameEngine {
   }
 
   resetState() {
-    this.players = {}; // socketId -> player object
+    this.players = {}; // playerId -> player object
+    this.socketToPlayer = {}; // socketId -> playerId
     this.phase = 'lobby'; // lobby, night, day, end
     this.dayCount = 0;
-    this.nightVotes = {}; // moleSocketId -> targetPlayerId
-    this.dayVotes = {}; // socketId -> targetPlayerId
+    this.nightVotes = {}; // molePlayerId -> targetPlayerId
+    this.dayVotes = {}; // playerId -> targetPlayerId
     this.diagnosticianTarget = null;
     this.therapistHealTarget = null; // targetId saved by therapist
     this.lastNightActions = { killTarget: null, healTarget: null, investigateTarget: null };
@@ -21,30 +22,41 @@ class GameEngine {
     this.chatHistory = [];
   }
 
-  addPlayer(socketId, name) {
-    if (this.phase !== 'lobby') return false;
-    // For testing, we might want to allow fewer players, but the rules say 18.
-    // I will allow any number up to 18 for testing, and dynamically scale roles, 
-    // but the default requested is 18.
+  addPlayer(socketId, name, playerId) {
+    if (this.players[playerId]) {
+      // Reconnect
+      this.players[playerId].socketId = socketId;
+      this.socketToPlayer[socketId] = playerId;
+      this.broadcastState();
+      return { success: true };
+    }
+
+    if (this.phase !== 'lobby') {
+      return { success: false, reason: 'Сессия игры уже началась. Вы сможете присоединиться к следующей сессии.' };
+    }
     
-    this.players[socketId] = {
-      id: socketId,
+    this.players[playerId] = {
+      id: playerId,
       name,
       role: null,
-      caseData: null, // real case for patients/doctors, fake for moles
+      caseData: null, 
       isAlive: true,
       socketId,
     };
+    this.socketToPlayer[socketId] = playerId;
     
     this.broadcastState();
-    return true;
+    return { success: true };
   }
 
   removePlayer(socketId) {
-    delete this.players[socketId];
-    if (Object.keys(this.players).length === 0) {
-      this.resetState();
-    } else {
+    const playerId = this.socketToPlayer[socketId];
+    if (playerId) {
+      if (this.phase === 'lobby') {
+        // Only remove player entirely if game hasn't started
+        delete this.players[playerId];
+        delete this.socketToPlayer[socketId];
+      }
       this.broadcastState();
     }
   }
@@ -145,11 +157,14 @@ class GameEngine {
   }
 
   handleVote(socketId, targetId, isDay) {
+    const playerId = this.socketToPlayer[socketId];
+    if (!playerId) return;
+
     if (isDay && this.phase === 'day') {
-      this.dayVotes[socketId] = targetId;
+      this.dayVotes[playerId] = targetId;
       this.broadcastState();
-    } else if (!isDay && this.phase === 'night' && this.players[socketId].role === 'Mole') {
-      this.nightVotes[socketId] = targetId;
+    } else if (!isDay && this.phase === 'night' && this.players[playerId].role === 'Mole') {
+      this.nightVotes[playerId] = targetId;
       this.broadcastState();
     }
   }
@@ -184,7 +199,10 @@ class GameEngine {
   }
 
   diagnosticianInvestigate(socketId, targetId) {
-    if (this.phase === 'night' && this.players[socketId].role === 'Diagnostician') {
+    const playerId = this.socketToPlayer[socketId];
+    if (!playerId) return;
+
+    if (this.phase === 'night' && this.players[playerId].role === 'Diagnostician') {
       const target = this.players[targetId];
       this.diagnosticianTarget = targetId;
       let resultText = '';
@@ -206,7 +224,10 @@ class GameEngine {
   }
 
   therapistHeal(socketId, targetId) {
-    if (this.phase === 'night' && this.players[socketId].role === 'Therapist') {
+    const playerId = this.socketToPlayer[socketId];
+    if (!playerId) return;
+
+    if (this.phase === 'night' && this.players[playerId].role === 'Therapist') {
       this.therapistHealTarget = targetId;
       // Send confirmation to therapist
       this.io.to(socketId).emit('healResult', { targetName: this.players[targetId].name });
@@ -262,7 +283,10 @@ class GameEngine {
     });
   }
 
-  addChatMessage(senderId, text, channel) {
+  addChatMessage(senderSocketId, text, channel) {
+    const senderId = this.socketToPlayer[senderSocketId];
+    if (!senderId) return;
+
     const player = this.players[senderId];
     if (!player) return;
 
@@ -282,10 +306,9 @@ class GameEngine {
     this.broadcastState(); // Or broadcast just the message for efficiency
   }
 
-  getPublicState(socketId) {
+  getPublicState(playerId) {
     // Hide sensitive role info from standard clients
-    const isClientAdmin = false; // Add real admin auth later
-    const currentPlayer = this.players[socketId];
+    const currentPlayer = this.players[playerId];
 
     const safePlayers = Object.values(this.players).map(p => {
       // If I am this player, OR I am a Mole and the other is a Mole, OR game is over, show role
@@ -347,9 +370,11 @@ class GameEngine {
   }
 
   broadcastState() {
-    // Send personalized state to each player
-    Object.keys(this.players).forEach(socketId => {
-      this.io.to(socketId).emit('gameState', this.getPublicState(socketId));
+    // Send personalized state to each player via their active socketId
+    Object.values(this.players).forEach(player => {
+      if (player.socketId) {
+        this.io.to(player.socketId).emit('gameState', this.getPublicState(player.id));
+      }
     });
     
     // Send master state to admin room
