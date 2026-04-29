@@ -17,13 +17,13 @@ function App() {
   const prevPhaseRef = useRef(null);
   const prevAliveRef = useRef(null);
 
-  // Generate or retrieve persistent player ID
+  // Generate or retrieve persistent player ID (per tab)
   const playerIdRef = useRef(null);
   useEffect(() => {
-    let savedId = localStorage.getItem('heuc_playerId');
+    let savedId = sessionStorage.getItem('heuc_playerId');
     if (!savedId) {
       savedId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-      localStorage.setItem('heuc_playerId', savedId);
+      sessionStorage.setItem('heuc_playerId', savedId);
     }
     playerIdRef.current = savedId;
   }, []);
