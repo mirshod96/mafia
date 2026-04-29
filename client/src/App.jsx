@@ -12,7 +12,7 @@ function App() {
   const [gameState, setGameState] = useState(null);
   const [adminState, setAdminState] = useState(null);
   const [view, setView] = useState('login'); // login, lobby, dashboard, admin
-  const [playerName, setPlayerName] = useState('');
+  const [playerName, setPlayerName] = useState(sessionStorage.getItem('heuc_playerName') || '');
   const [joinError, setJoinError] = useState('');
   const prevPhaseRef = useRef(null);
   const prevAliveRef = useRef(null);
@@ -26,6 +26,12 @@ function App() {
       sessionStorage.setItem('heuc_playerId', savedId);
     }
     playerIdRef.current = savedId;
+
+    // Auto-reconnect if we already have a name saved
+    const savedName = sessionStorage.getItem('heuc_playerName');
+    if (savedName) {
+      socket.emit('joinGame', { name: savedName, playerId: savedId });
+    }
   }, []);
 
   useEffect(() => {
@@ -46,7 +52,8 @@ function App() {
         prevAliveRef.current = state.me.isAlive;
       }
 
-      if (view === 'login' || view === 'lobby') {
+      // Automatically set the correct view if we are a player
+      if (view !== 'admin' && state.me) {
         setView(state.phase === 'lobby' ? 'lobby' : 'dashboard');
       }
     });
@@ -66,9 +73,11 @@ function App() {
     socket.on('joinResult', (result) => {
       if (result.success) {
         setJoinError('');
-        setView('lobby');
+        // View is handled by the gameState event now
       } else {
         setJoinError(result.reason);
+        sessionStorage.removeItem('heuc_playerName'); // Clear on failure to prevent infinite loops
+        setView('login');
       }
     });
 
@@ -84,6 +93,7 @@ function App() {
   const joinGame = (e) => {
     e.preventDefault();
     if (playerName.trim() && playerIdRef.current) {
+      sessionStorage.setItem('heuc_playerName', playerName);
       setJoinError('');
       socket.emit('joinGame', { name: playerName, playerId: playerIdRef.current });
     }
