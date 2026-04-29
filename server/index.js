@@ -20,7 +20,18 @@ const game = new GameEngine(io);
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
-  socket.on('joinGame', ({ name, playerId }) => {
+  socket.on('joinGame', (payload) => {
+    let name, playerId;
+    if (typeof payload === 'string') {
+      name = payload;
+      playerId = socket.id; // Fallback for old cached clients
+    } else if (payload && typeof payload === 'object') {
+      name = payload.name;
+      playerId = payload.playerId;
+    }
+    
+    if (!name || !playerId) return;
+    
     const result = game.addPlayer(socket.id, name, playerId);
     socket.emit('joinResult', result);
   });
