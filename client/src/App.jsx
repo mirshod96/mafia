@@ -53,8 +53,14 @@ function App() {
       }
 
       // Automatically set the correct view if we are a player
-      if (view !== 'admin' && state.me) {
-        setView(state.phase === 'lobby' ? 'lobby' : 'dashboard');
+      if (view !== 'admin') {
+        if (state.me) {
+          setView(state.phase === 'lobby' ? 'lobby' : 'dashboard');
+        } else if (view !== 'login') {
+          // If we lost our player state, the session was reset
+          sessionStorage.removeItem('heuc_playerName');
+          setView('login');
+        }
       }
     });
 

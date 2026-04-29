@@ -46,6 +46,10 @@ io.on('connection', (socket) => {
     game.startGame();
   });
 
+  socket.on('resetGame', () => {
+    game.resetGame();
+  });
+
   socket.on('voteDay', (targetId) => {
     game.handleVote(socket.id, targetId, true);
   });

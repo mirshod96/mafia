@@ -18,8 +18,12 @@ class GameEngine {
     this.therapistHealTarget = null; // targetId saved by therapist
     this.lastNightActions = { killTarget: null, healTarget: null, investigateTarget: null };
     this.eliminatedTonight = null;
-    this.winner = null;
     this.chatHistory = [];
+  }
+
+  resetGame() {
+    this.resetState();
+    this.broadcastState();
   }
 
   addPlayer(socketId, name, playerId) {

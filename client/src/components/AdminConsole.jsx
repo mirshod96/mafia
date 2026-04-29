@@ -13,6 +13,12 @@ function AdminConsole({ socket, adminState }) {
     socket.emit('executeDayVote');
   };
 
+  const handleResetGame = () => {
+    if (window.confirm('Are you sure you want to completely wipe the current session and kick all players to the login screen?')) {
+      socket.emit('resetGame');
+    }
+  };
+
   return (
     <div className="app-container" style={{ background: '#1a1a2e', color: 'white', overflowY: 'auto' }}>
       <div style={{ padding: '20px', borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -23,6 +29,7 @@ function AdminConsole({ socket, adminState }) {
         <div style={{ display: 'flex', gap: '10px' }}>
           {phase === 'day' && <button className="btn" onClick={handleExecuteDayVote}>Execute Day Vote</button>}
           <button className="btn primary" onClick={handleNextPhase} disabled={phase === 'end'}>Force Next Phase</button>
+          <button className="btn danger" onClick={handleResetGame}>Reset Session</button>
         </div>
       </div>
 
