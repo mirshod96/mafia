@@ -318,7 +318,7 @@ class GameEngine {
       if (this.phase === 'end') {
         showRole = true;
         showCase = true;
-      } else if (socketId === p.id) {
+      } else if (playerId === p.id) {
         showRole = true;
         showCase = true;
       } else if (currentPlayer?.role === 'Mole' && p.role === 'Mole') {
