@@ -99,6 +99,20 @@ function PlayerDashboard({ socket, gameState }) {
                   {me.role === 'Diagnostician' && 'At night, you request the system to check a participant to see if they are the Mafia.'}
                 </p>
               </div>
+
+              {gameState.publicCases && gameState.publicCases.length > 0 && (
+                <div style={{ background: 'rgba(255,204,0,0.05)', padding: '15px', borderRadius: '8px', borderLeft: '4px solid var(--accent-warning)' }}>
+                  <h3 style={{ marginBottom: '10px', color: 'var(--accent-warning)' }}>PUBLIC CASES (THIS SESSION)</h3>
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '10px' }}>
+                    All players in this session have one of the following diseases:
+                  </p>
+                  <ul style={{ paddingLeft: '20px', fontSize: '14px', color: 'var(--text-main)' }}>
+                    {gameState.publicCases.map((c, idx) => (
+                      <li key={idx} style={{ marginBottom: '5px' }}>{c.diagnosis}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
         </div>

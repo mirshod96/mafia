@@ -19,6 +19,7 @@ class GameEngine {
     this.lastNightActions = { killTarget: null, healTarget: null, investigateTarget: null };
     this.eliminatedTonight = null;
     this.chatHistory = [];
+    this.publicCases = [];
   }
 
   resetGame() {
@@ -85,23 +86,26 @@ class GameEngine {
     // Shuffle roles
     roles.sort(() => Math.random() - 0.5);
     
-    // Shuffle cases
+    // Pick 3 random cases for the session
     let shuffledCases = [...medicalCases].sort(() => Math.random() - 0.5);
+    this.publicCases = shuffledCases.slice(0, 3);
 
     playerIds.forEach((id, index) => {
       this.players[id].role = roles[index];
       
-      // Assign case
+      // Assign case randomly from the 3 public cases
+      const randomCaseIndex = Math.floor(Math.random() * 3);
+      const assignedCase = this.publicCases[randomCaseIndex];
+
       if (this.players[id].role === 'Mole') {
         // Moles get a fake case diagnosis, but no real vitals
-        const fakeCase = shuffledCases.pop();
         this.players[id].caseData = {
-          id: fakeCase.id,
-          diagnosis: fakeCase.diagnosis,
+          id: assignedCase.id,
+          diagnosis: assignedCase.diagnosis,
           isFake: true
         };
       } else {
-        this.players[id].caseData = shuffledCases.pop();
+        this.players[id].caseData = { ...assignedCase };
       }
     });
 
@@ -348,7 +352,8 @@ class GameEngine {
       players: safePlayers,
       me: currentPlayer,
       chat: safeChat,
-      winner: this.winner
+      winner: this.winner,
+      publicCases: this.publicCases
     };
   }
   
@@ -364,7 +369,8 @@ class GameEngine {
       dayVotes: this.dayVotes,
       therapistHealTarget: this.therapistHealTarget,
       diagnosticianTarget: this.diagnosticianTarget,
-      lastNightActions: this.lastNightActions
+      lastNightActions: this.lastNightActions,
+      publicCases: this.publicCases
     };
   }
 

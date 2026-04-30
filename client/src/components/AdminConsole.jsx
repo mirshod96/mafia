@@ -3,7 +3,7 @@ import React from 'react';
 function AdminConsole({ socket, adminState }) {
   if (!adminState) return <div style={{ color: 'white', padding: '20px' }}>Loading Admin Console...</div>;
 
-  const { phase, dayCount, players, winner, nightVotes, dayVotes, therapistHealTarget, diagnosticianTarget, lastNightActions } = adminState;
+  const { phase, dayCount, players, winner, nightVotes, dayVotes, therapistHealTarget, diagnosticianTarget, lastNightActions, publicCases } = adminState;
 
   const handleNextPhase = () => {
     socket.emit('triggerNextPhase');
@@ -111,6 +111,18 @@ function AdminConsole({ socket, adminState }) {
               <p style={{ fontSize: '14px' }}>Player X described symptoms of Asthma, but assigned fake case is Myocardial Infarction.</p>
             </div>
           </div>
+
+          {/* Active Cases Block */}
+          {publicCases && publicCases.length > 0 && (
+            <div className="glass-panel" style={{ background: 'rgba(255,204,0,0.05)', border: '1px solid var(--accent-warning)' }}>
+              <h2 style={{ color: 'var(--accent-warning)', marginBottom: '10px' }}>Active Session Cases</h2>
+              <ul style={{ paddingLeft: '20px', fontSize: '14px' }}>
+                {publicCases.map((c, idx) => (
+                  <li key={idx}>{c.diagnosis}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>
